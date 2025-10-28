@@ -1,32 +1,31 @@
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Shop {
-    private HashMap<Product,Integer> warehouse;
+    private ConcurrentHashMap<Product,Integer> warehouse;
+    //private ConcurrentHashMap<Product, Object> productLocks;
     public Shop() {
-        this.warehouse = new HashMap<>();
+        this.warehouse = new ConcurrentHashMap<>();
     }
 
     public void addProduct(Product product,Integer quantity){
         warehouse.put(product,quantity);
     }
 
-    public void addOneProduct(Product product){
-        warehouse.compute(product,(key,oldvalue) -> oldvalue+1);
-        System.out.println();
-    }
 
-    public boolean orderProduct(Product product, Integer quantity){
-        if (quantity > warehouse.get(product)){
-            return false;
+    public boolean orderProduct(Product product, Integer quantity) {
+        // use the product object itself as the lock!!!!!!!!!!!!!!!!!!!!!!!!!
+        // avoid example where both clients want to buy last item
+        synchronized (product) {
+            if (quantity > warehouse.get(product)){
+                return false;
+            }
+            warehouse.compute(product,(key,oldvalue) -> oldvalue-quantity);
+            return true;
         }
-        warehouse.compute(product,(key,oldvalue) -> oldvalue-quantity);
-        return true;
     }
 
-    public int getProductQuantity(Product product){
-        return warehouse.get(product);
-    }
 
+    public int getProductQuantity(Product product){return warehouse.get(product);}
 
    
 }
