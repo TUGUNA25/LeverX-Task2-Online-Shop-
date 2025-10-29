@@ -1,10 +1,8 @@
 import java.util.concurrent.*;
 import java.util.*;
-import java.util.stream.*;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
-        // Create more products
         Product toy = new Product("Toy Car", 15.99);
         Product book = new Product("Java Book", 29.99);
         Product laptop = new Product("Laptop", 899.99);
@@ -129,36 +127,24 @@ public class Main {
         
         System.out.println("\n/////// ANALYTICS ///////");
         
-        List<Order> allOrders = shop.getAllOrders();
-        
-        // 1. Total number of orders
-        long totalOrders = allOrders.parallelStream().count();
+        // Total number of orders
+        long totalOrders = shop.getTotalOrders();
         System.out.println("Total number of orders: " + totalOrders);
         
-        // 2. Total profit from successful orders
-        double totalProfit = allOrders.parallelStream()
-            .filter(Order::isSuccess)
-            .mapToDouble(order -> order.getProduct().getPrice() * order.getQuantity())
-            .sum();
+        // Total profit from successful orders
+        double totalProfit = shop.getTotalProfit();
         System.out.println("Total profit: $" + String.format("%.2f", totalProfit));
         
-        // 3. Top 3 best-selling products
+        // 3 best-selling products
         System.out.println("Top 3 best-selling products:");
-        allOrders.parallelStream()
-            .filter(Order::isSuccess)
-            .collect(Collectors.groupingByConcurrent(
-                Order::getProduct,
-                Collectors.summingLong(Order::getQuantity)
-            ))
-            .entrySet()
-            .stream()
-            .sorted((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()))
-            .limit(3)
-            .forEach(entry -> 
-                System.out.println("  - " + entry.getKey().getName() + 
-                    ": " + entry.getValue() + " units ($" + 
-                    String.format("%.2f", entry.getKey().getPrice() * entry.getValue()) + " revenue)")
-            );
+        Map<Product, Long> topProducts = shop.getTopSellingProducts(3);
+        topProducts.forEach((product, quantity) -> 
+            System.out.println("  - " + product.getName() + 
+                ": " + quantity + " units ($" + 
+                String.format("%.2f", product.getPrice() * quantity) + " revenue)")
+        );
+        
+        
         
     }
 }
