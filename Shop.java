@@ -1,7 +1,10 @@
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Shop {
     private ConcurrentHashMap<Product,Integer> warehouse;
+    private List<Order> allOrders = new CopyOnWriteArrayList<>();
     //private ConcurrentHashMap<Product, Object> productLocks;
     public Shop() {
         this.warehouse = new ConcurrentHashMap<>();
@@ -24,6 +27,13 @@ public class Shop {
         }
     }
 
+    public void addOrder(Order order) {
+        allOrders.add(order);
+    }
+
+    public List<Order> getAllOrders() {
+        return allOrders;
+    }
 
     public int getProductQuantity(Product product){return warehouse.get(product);}
 
